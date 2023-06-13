@@ -88,6 +88,14 @@ export const CheckoutForm: React.FC<IProps> = ({ onSubmit }: IProps) => {
         } else if (key === 'cardInfo.cardExpiryDate') {
             const tmp = e.target.value.replace(/\D/g, '').split('');
 
+            if (tmp.length > 0) {
+                tmp[0] = tmp[0].replace(/[4,5,6,7,8,9]/, '');
+            }
+
+            if (tmp.length > 1 && tmp[0] === '3') {
+                tmp[1] = tmp[1].replace(/[2,3,4,5,6,7,8,9]/, '');
+            }
+
             if (tmp.length > 2) {
                 tmp.splice(2, 0, '/');
             }
