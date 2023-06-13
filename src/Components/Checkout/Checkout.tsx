@@ -10,17 +10,43 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import theme from '../../theme'
+import {IProductState, useProductStore} from '../../store/products';
+import {Payment, PaymentInfo, PaymentProduct, ProductsCheckout} from '../../Types/Product';
+import CheckoutItem from './CheckoutItem';
+import {CheckoutForm} from './CheckoutForm';
+import {ProductHttpService} from '../../Http/Products.http.service';
+import {useNavigate} from 'react-router-dom';
 
 export default function Checkout() {
-  const [displayResponse, setDisplayResponse] = useState<boolean>()
+    const navigate = useNavigate();
+    const selectedProducts = useProductStore((state: IProductState) => state.selectedProducts);
 
-  const onSubmit = async () => {
-    // Validate and submit data ......
+  const [displayResponse, setDisplayResponse] = useState<boolean>(false)
+
+  const onSubmit = async (paymentInfo: PaymentInfo) => {
+
+      const checkout: Payment = {
+          requestId: '1',
+          paymentInfo,
+          products: selectedProducts.map((p: ProductsCheckout) => {
+              return {
+                  id: p.product.id,
+                  quantity: p.quantity
+              }
+          })
+      }
+      try {
+          await ProductHttpService.buyProducts(checkout);
+          navigate('/thanks')
+      } catch (e) {
+          setDisplayResponse(true);
+      }
+
   }
 
-  const getTotalCost = (): number => {
-    return 0
-  }
+  const selectedProductsJSX = selectedProducts.map((product: ProductsCheckout) => {
+      return <CheckoutItem key={product.product.id} holder={product}/>
+  })
 
   return (
     <Grid container display='flex' justifyContent='center'>
@@ -36,66 +62,17 @@ export default function Checkout() {
           },
         }}
       >
-        <Grid xs={12} item mb={4}>
+        <Grid xs={12} item mb={5}>
           <Typography align='center' variant='h4' fontWeight={800}>
             Checkout
           </Typography>
-        </Grid>
-        <form onSubmit={onSubmit} style={{ maxWidth: '450px' }}>
-          <Grid xs={12} item display='flex' flexDirection='column' gap={2} mt={4}>
-            <Typography fontWeight={800}>Email</Typography>
-            <TextField id='email' variant='outlined' />
-            <Typography fontWeight={800}>Card Information</Typography>
-            <TextField
-              id='cardNumber'
-              variant='outlined'
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    (
-                    <Box component='img' ml={1} src='mastercard.svg' sx={{ width: '20px' }} />
-                    <Box component='img' src='visa.svg' sx={{ width: '20px' }} />)
-                  </InputAdornment>
-                ),
-              }}
-            />
 
-            <Grid container>
-              <Grid xs={6} item>
-                <TextField
-                  id='cardDate'
-                  variant='outlined'
-                  fullWidth
-                  inputProps={{
-                    maxLength: 5,
-                  }}
-                />
-              </Grid>
-              <Grid xs={6} item>
-                <TextField
-                  id='cardCvc'
-                  variant='outlined'
-                  fullWidth
-                  inputProps={{
-                    maxLength: 3,
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <Box component='img' src='cvc.png' sx={{ width: '20px' }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
+            <Grid xs={12} item display='flex' flexDirection='column' gap={4} mt={4}>
+            { selectedProductsJSX }
             </Grid>
-            <Grid xs={12} item justifyContent='center' display='flex' mt={4}>
-              <Button variant='contained' color='secondary' type='submit'>
-                Pay {getTotalCost()} TBH
-              </Button>
-            </Grid>
-          </Grid>
-        </form>
+        </Grid>
+
+          <CheckoutForm onSubmit={onSubmit} />
       </Grid>
 
       <Snackbar

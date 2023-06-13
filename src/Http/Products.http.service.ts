@@ -13,6 +13,11 @@ export class ProductHttpService {
   }
 
   public static async buyProducts(checkout: Payment): Promise<void> {
-    // work here....
+    await axios.post<void>(
+        'https://c8036bd8-ea01-4f47-9ff1-dbf8001a0500.mock.pstmn.io/pay',
+        {
+          data: checkout,
+        },
+    )
   }
 }

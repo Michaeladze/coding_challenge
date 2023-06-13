@@ -3,14 +3,21 @@ import { Product } from '../../Types/Product'
 import IndeterminateCheckBoxOutlinedIcon from '@mui/icons-material/IndeterminateCheckBoxOutlined'
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined'
 import theme from '../../theme'
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
+import {IProductState, useProductStore} from '../../store/products';
 
 interface ProductProps {
   product: Product
 }
 
 export default function ProductItem(props: ProductProps) {
-  const [quantity, setQuantity] = useState<number>(0)
+  const [quantity, setQuantity] = useState<number>(0);
+
+  const selectProduct = useProductStore((state: IProductState) => state.selectProduct);
+
+  useEffect(() => {
+    selectProduct(props.product, quantity);
+  }, [props.product, quantity]);
 
   return (
     <Grid

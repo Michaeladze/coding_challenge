@@ -28,6 +28,17 @@ export interface Payment {
   products: PaymentProduct[]
 }
 
+export interface PaymentInfo {
+  email: string
+  cardInfo: CardInfo;
+}
+
+export interface CardInfo {
+  cardNo: string
+  cardExpiryDate: string
+  cardCVV: string
+}
+
 export interface PaymentProduct {
   id: number
   quantity: number
